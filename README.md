@@ -6,12 +6,20 @@ A display service for the [waveshare st7735s based 1.44inch LCD raspberry displa
   - Replace `spidev0.0` by the spi interface used by the screen. I used `/dev/spidev0.0` for my tests.
 - may require to be started with `--privileged`
 
+## Usage
+- send text data via `POST` method, using the following payload as example
+```
+{
+  "text": "some text message you want to display on the screen"
+}
+```
+
 ## Upcoming
 - line horizontal scroll
 - multilines vertical scroll
 - various color options
 - display presets
-- authentification
+- authentication
 
 ## Hardware specifications
 From waveshare product page
