@@ -7,6 +7,8 @@ import LCD_Config
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
+version = '1.0.0'
+
 # WIDTH = 128
 # HEIGHT = 128
 
@@ -49,7 +51,19 @@ def post_text():
     return
 
 _text(
-  text=time.strftime("%Y/%m/%d @ %H:%M:%S", time.localtime()) + "st7735s server ready " + "prototype.local:" + str(port) + " protocol: HTTP"
+  text=time.strftime(
+    "%Y/%m/%d @ %H:%M:%S", time.localtime())
+    + "                     "
+    + "rpi.web.st7735s      "
+    + "                     "
+    + "version " + version + "        "
+    + "                     "
+    + "st7735s server ready "
+    + "                     "
+    + " protocol: HTTP"
+    + "                     "
+    + " method 'POST'       "
+    + "                     "
 )
 
 @get('/')
