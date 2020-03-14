@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div style="display: flex;">
+    <input id="network-status-watcher" type="checkbox" checked/>
+    <div id="network-status">online</div>
+  </div>
+  <form action="/" method="POST">
+    <div>
+      <textarea id="lines" type="text"></textarea>
+    </div>
+    <div>
+      <button id="submit-button" type="submit">send</button>
+      <input id="autosend" type="checkbox" checked/>
+      <label>auto</label>
+    </div>
+  </form>
+  <script>
+    console.info('lorem')
+    document.addEventListener('DOMContentLoaded', () => {
+      let intervalId;
+      const networkStatusWatcherEl = document.querySelector('#network-status-watcher');
+      const networkStatusEl = document.querySelector('#network-status');
+      const form = document.querySelector('form');
+      const linesElement = document.querySelector('#lines');
+      const submitButton = document.querySelector('#submit-button');
+      const autoSend = document.querySelector('#autosend');
+      const getSubmitButton = () => document.querySelector('[type="submit"]');
+      const headers = { 'Content-Type': 'application/json' };
+
+      const networkStatusWatcherHandler = () => {
+        const { checked } = networkStatusWatcherEl;
+        if (checked) {
+          intervalId = setInterval(async () => {
+            try {
+              const result = await fetch('/', { method: 'HEAD' });
+              const { ok = false } = result;
+              const _ok = !(result instanceof Error) && ok;
+              networkStatusEl.textContent = `[${_ok ? '✓':'✗'}] o${_ok ? 'n' : 'ff'}line`;
+              getSubmitButton().removeAttribute('disabled');
+            } catch(error) {
+              networkStatusEl.textContent = '[✗] offline';
+              getSubmitButton().setAttribute('disabled', 'disabled');
+            }
+          }, 1000);
+        } else {
+          clearInterval(intervalId);
+        }
+      };
+
+      networkStatusWatcherEl.addEventListener('change', networkStatusWatcherHandler);
+
+      const getData = () => [({ x: 0, text: document.querySelector('form textarea').value })];
+
+      const sendData = async lines => {
+        try {
+          const result = await fetch('/', { method: 'POST', headers, body: JSON.stringify({ lines }) });
+          networkStatusWatcherEl.removeAttribute('checked');
+          networkStatusWatcherHandler();
+          getSubmitButton().textContent = 'sent !';
+          const id = setTimeout(() => {
+              getSubmitButton().textContent = 'send';
+          }, 1000);
+          getSubmitButton().removeAttribute('disabled');
+        } catch (error) {
+          console.info('error', error);
+          networkStatusWatcherEl.setAttribute('checked', 'checked');
+          networkStatusWatcherHandler();
+        }
+      };
+
+      const formHandler = ({ checked }) => async event => {
+        event.preventDefault();
+        if (checked) return false;
+        const lines = getData();
+        sendData(lines);
+      };
+
+      autoSend.addEventListener('change', async () => {
+        const { checked } = autoSend;
+        if (checked) {
+          autoSend.removeAttribute('checked');
+          getSubmitButton().setAttribute('disabled', 'disabled');
+          form.removeEventListener('submit');
+          linesElement.addEventListener('keyup', formHandler({ checked: false }));
+        } else {
+          autoSend.setAttribute('checked', 'checked');
+          getSubmitButton().removeAttribute('disabled');
+          linesElement.removeEventListener('submit');
+          form.addEventListener('submit', formHandler({ checked: true }));
+        }
+      });
+      linesElement.addEventListener('keyup', formHandler(autoSend));
+    });
+  </script>
+</body>
+</html>
